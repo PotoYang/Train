@@ -1,0 +1,4 @@
+# Train
+地铁车厢人数获取
+使用百度地图API进行定位，并自定义标记
+使用SwipRefresh配合OkHttp进行数据获取并刷新
