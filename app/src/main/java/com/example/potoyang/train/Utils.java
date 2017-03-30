@@ -13,7 +13,6 @@ import com.baidu.location.LocationClientOption;
  */
 
 public class Utils {
-
     Context context;
 
     public Utils(Context context) {

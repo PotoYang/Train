@@ -13,7 +13,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -61,6 +60,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Utils checkGPS;
 
+    private double mLatitude, mLongitude;
+    private int windowWidth, windowHeight;
+
+    private int headColor = 0, tailColor = 0;
+
     private static double[] latitude_array = {30.763698, 30.751588, 30.738796, 30.72749};
     private static double[] longitude_array = {103.978044, 103.98289, 103.98589, 104.00276};
     private static String[] station_name = {"犀浦站", "天河路", "百草路", "金周路"};
@@ -71,13 +75,10 @@ public class MainActivity extends AppCompatActivity {
     private PopupWindow infoPopupWindow;
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    private List<String> adapterData;
-    private ArrayAdapter<String> adapter;
+    private PopAdapter popAdapter;
 
-    private double mLatitude, mLongitude;
-
-    int windowWidth;
-    int windowHeight;
+    private List<String> adapterData = new ArrayList<>();
+    private List<Integer> colors = new ArrayList<>();
 
     private ListView list;
 
@@ -203,21 +204,38 @@ public class MainActivity extends AppCompatActivity {
 
                 for (int index = 0; index < 4; index++) {
                     if (m == marker[index]) {
+                        final int finalIndex = index;
+
                         view_pop = LayoutInflater.from(getBaseContext()).inflate(R.layout.pop, null);
                         TextView tv = (TextView) view_pop.findViewById(R.id.tv_pop);
+
                         tv.setText(station_name[index]);
 
                         list = (ListView) view_pop.findViewById(R.id.pop_list);
-                        adapterData = new ArrayList<>();
-                        
+
+                        colors.clear();
+
+                        for (int i = 0; i < 6; i++)
+                            colors.add(Color.TRANSPARENT);
+
+                        adapterData.clear();
+
                         adapterData.add("请下拉刷新");
-                        adapter = new ArrayAdapter<>(getBaseContext(), android.R.layout.simple_list_item_1, adapterData);
-                        list.setAdapter(adapter);
+
+                        headColor = Color.GREEN;
+                        tailColor = Color.BLACK;
+
+                        popAdapter = new PopAdapter(getBaseContext(), adapterData, headColor, tailColor, colors);
+
+                        list.setAdapter(popAdapter);
+
+                        infoPopupWindow = new PopupWindow(view_pop, windowWidth * 7 / 8, windowHeight * 5 / 8);
+                        infoPopupWindow.showAtLocation(mapView, Gravity.CENTER, 0, 0);
 
                         swipeRefreshLayout = (SwipeRefreshLayout) view_pop.findViewById(R.id.sr_layout);
                         swipeRefreshLayout.setProgressBackgroundColorSchemeColor(Color.LTGRAY);
                         swipeRefreshLayout.setColorSchemeColors(Color.DKGRAY, Color.WHITE);
-                        final int finalIndex = index;
+
                         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
@@ -229,8 +247,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                        infoPopupWindow = new PopupWindow(view_pop, windowWidth * 7 / 8, windowHeight * 5 / 8);
-                        infoPopupWindow.showAtLocation(mapView, Gravity.CENTER, 0, 0);
                     }
                 }
 
@@ -253,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             Bundle bun = msg.getData();
-            String str = bun.getString("station_num");
+            final String str = bun.getString("station_num");
 
             RequestParams params = new RequestParams();
             params.put("auth_key", str);
@@ -274,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
                                 map.put("data4", jsonArray.getString("data4"));
                                 map.put("data5", jsonArray.getString("data5"));
                                 map.put("data6", jsonArray.getString("data6"));
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -281,24 +298,25 @@ public class MainActivity extends AppCompatActivity {
                             if (!map.isEmpty()) {
                                 if (map.get("data1").equals("null")) {
                                     adapterData.clear();
-                                    adapter.notifyDataSetChanged();
+                                    popAdapter.notifyDataSetChanged();
                                     swipeRefreshLayout.setRefreshing(false);
                                     Toast.makeText(MainActivity.this, "哦嚄,数据不见咯!", Toast.LENGTH_SHORT).show();
                                 } else {
                                     adapterData.clear();
-                                    adapterData.add(0, map.get("data1"));
-                                    adapterData.add(1, map.get("data2"));
-                                    adapterData.add(2, map.get("data3"));
-                                    adapterData.add(3, map.get("data4"));
-                                    adapterData.add(4, map.get("data5"));
-                                    adapterData.add(5, map.get("data6"));
+                                    adapterData.add(0, str);
+                                    colors.add(0, Integer.valueOf(map.get("data1")));
+                                    colors.add(1, Integer.valueOf(map.get("data2")));
+                                    colors.add(2, Integer.valueOf(map.get("data3")));
+                                    colors.add(3, Integer.valueOf(map.get("data4")));
+                                    colors.add(4, Integer.valueOf(map.get("data5")));
+                                    colors.add(5, Integer.valueOf(map.get("data6")));
 
-                                    adapter.notifyDataSetChanged();
+                                    popAdapter.notifyDataSetChanged();
                                     swipeRefreshLayout.setRefreshing(false);
                                 }
                             } else {
                                 adapterData.clear();
-                                adapter.notifyDataSetChanged();
+                                popAdapter.notifyDataSetChanged();
                                 swipeRefreshLayout.setRefreshing(false);
                             }
                         }
