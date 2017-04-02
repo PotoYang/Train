@@ -51,6 +51,7 @@ public class PopAdapter extends BaseAdapter {
         viewHolder.myItemView.setHeadColor(headColor);
         viewHolder.myItemView.setTailColor(tailColor);
         viewHolder.myItemView.setBoxColor(boxColor);
+        viewHolder.myItemView.setText("换向");
 
         return view;
 

@@ -2,6 +2,7 @@ package com.example.potoyang.train;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -22,6 +23,7 @@ public class MyItemView extends View {
     private int headColor = 0;
     private int tailColor = 0;
     private List<Integer> boxColor = new ArrayList<>();
+    private String text = "";
 
     public MyItemView(Context context) {
         super(context);
@@ -44,6 +46,9 @@ public class MyItemView extends View {
         drawTail(canvas, tailColor);
 
         drawBox(canvas, boxColor);
+
+        drawText(canvas, text);
+
     }
 
     public void setHeadColor(int headColor) {
@@ -56,6 +61,10 @@ public class MyItemView extends View {
 
     public void setBoxColor(List<Integer> boxColor) {
         this.boxColor = boxColor;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
 
@@ -93,8 +102,15 @@ public class MyItemView extends View {
         canvas.drawArc(tail, 0, -90, true, paint);
     }
 
+    /**
+     * 绘制车厢，不同的颜色表示不同的拥挤程度
+     *
+     * @param canvas
+     * @param boxColor
+     */
     private void drawBox(Canvas canvas, List<Integer> boxColor) {
         int left = 120;
+
         Paint paint = new Paint();
         for (int i = 0; i < 6; i++) {
             paint.setStrokeWidth(8);
@@ -104,5 +120,12 @@ public class MyItemView extends View {
             canvas.drawRect(box, paint);
             left = left + 60;
         }
+    }
+
+    private void drawText(Canvas canvas, String text) {
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(40);
+        canvas.drawText(text, 550, 50, paint);
     }
 }

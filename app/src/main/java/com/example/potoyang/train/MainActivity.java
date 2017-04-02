@@ -50,7 +50,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn_loc, btn_get;
+    private Button btn_loc;
     private TextView tv_lon, tv_biaoji;
 
     private MapView mapView = null;
@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
 
         mapView = (MapView) findViewById(R.id.bmapView);
         btn_loc = (Button) findViewById(R.id.btn_loc);
-        btn_get = (Button) findViewById(R.id.btn_get);
         tv_lon = (TextView) findViewById(R.id.tv_lon);
 
         baiduMap = mapView.getMap();
@@ -128,55 +127,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-//        btn_get.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                RequestParams params = new RequestParams();
-//                params.put("id", 1);
-//
-//                AsyncHttpClient client = new AsyncHttpClient();
-//                client.get("http://180.85.57.8:8888/Train/test.php", params,
-//                        new AsyncHttpResponseHandler() {
-//                            @Override
-//                            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-//                                String s = new String(responseBody);
-//                                latlon_array = s.split(",");
-//
-//                                ReverseGeoCodeOption reverseGeoCodeOption = new ReverseGeoCodeOption().location(
-//                                        new LatLng(Double.parseDouble(latlon_array[0]), Double.parseDouble(latlon_array[1])));
-//
-//                                geoCoder.reverseGeoCode(reverseGeoCodeOption);
-//
-//                                geoCoder.setOnGetGeoCodeResultListener(new OnGetGeoCoderResultListener() {
-//                                    @Override
-//                                    public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
-//                                        if (reverseGeoCodeResult == null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
-//                                            return;
-//                                        }
-//                                        if (reverseGeoCodeResult != null && reverseGeoCodeResult.error == SearchResult.ERRORNO.NO_ERROR) {
-//
-//                                            //得到位置
-//                                            address = reverseGeoCodeResult.getAddress();
-//                                            Toast.makeText(MainActivity.this, "" + address, Toast.LENGTH_SHORT).show();
-//                                        }
-//                                    }
-//                                });
-//
-//                            }
-//
-//                            @Override
-//                            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-//
-//                            }
-//                        });
-//            }
-//        });
 
         final View view_biaoji = LayoutInflater.from(MainActivity.this).inflate(R.layout.biaoji, null);
 
@@ -222,8 +172,8 @@ public class MainActivity extends AppCompatActivity {
 
                         adapterData.add("请下拉刷新");
 
-                        headColor = Color.GREEN;
-                        tailColor = Color.BLACK;
+                        headColor = getResources().getColor(R.color.tailColor);
+                        tailColor = getResources().getColor(R.color.headColor);
 
                         popAdapter = new PopAdapter(getBaseContext(), adapterData, headColor, tailColor, colors);
 
@@ -274,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
             RequestParams params = new RequestParams();
             params.put("auth_key", str);
             AsyncHttpClient client = new AsyncHttpClient();
-            client.get("http://192.168.1.108:8888/Train/test.php", params,
+            client.get("http://192.168.1.108:8888/Train/transdata.php", params,
                     new AsyncHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -304,13 +254,23 @@ public class MainActivity extends AppCompatActivity {
                                 } else {
                                     adapterData.clear();
                                     adapterData.add(0, str);
-                                    colors.add(0, Integer.valueOf(map.get("data1")));
-                                    colors.add(1, Integer.valueOf(map.get("data2")));
-                                    colors.add(2, Integer.valueOf(map.get("data3")));
-                                    colors.add(3, Integer.valueOf(map.get("data4")));
-                                    colors.add(4, Integer.valueOf(map.get("data5")));
-                                    colors.add(5, Integer.valueOf(map.get("data6")));
-
+                                    for (int i = 0; i < 6; i++) {
+                                        if (map.get(("data" + String.valueOf(i + 1))).equals("null")) {
+                                            colors.add(i, 0);
+                                        } else {
+                                            int dataTemp = Integer.valueOf(map.get("data" + String.valueOf(i + 1)));
+                                            if (dataTemp <= 40)
+                                                colors.add(i, getResources().getColor(R.color.green_very_empty));
+                                            else if (dataTemp <= 80)
+                                                colors.add(i, getResources().getColor(R.color.blue_empty));
+                                            else if (dataTemp <= 120)
+                                                colors.add(i, getResources().getColor(R.color.yellow_crowded));
+                                            else if (dataTemp <= 160)
+                                                colors.add(i, getResources().getColor(R.color.orange_more_crowded));
+                                            else
+                                                colors.add(i, getResources().getColor(R.color.red_very_crowded));
+                                        }
+                                    }
                                     popAdapter.notifyDataSetChanged();
                                     swipeRefreshLayout.setRefreshing(false);
                                 }
