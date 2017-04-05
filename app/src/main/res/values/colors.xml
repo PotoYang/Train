@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="red_very_crowded">#EA121F</color>
-    <color name="orange_more_crowded">#F25D13</color>
+    <color name="purple_more_crowded">#CC00CC</color>
     <color name="yellow_crowded">#F2EA13</color>
     <color name="blue_empty">#0F66C5</color>
     <color name="green_very_empty">#27C90F</color>

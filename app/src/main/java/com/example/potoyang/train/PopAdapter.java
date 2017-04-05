@@ -11,6 +11,8 @@ import java.util.List;
 
 /**
  * Created by 71579 on 2017/3/24.
+ *
+ * 自定义Adapter,实现Item的绘制
  */
 
 public class PopAdapter extends BaseAdapter {
@@ -72,7 +74,9 @@ public class PopAdapter extends BaseAdapter {
         return position;
     }
 
-
+    /**
+     * 使用ViewHolder保存数据，不用重复刷新界面
+     */
     class ViewHolder {
         TextView tv_line_num;
         MyItemView myItemView;

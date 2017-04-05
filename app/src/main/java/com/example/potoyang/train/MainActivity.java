@@ -65,12 +65,19 @@ public class MainActivity extends AppCompatActivity {
 
     private int headColor = 0, tailColor = 0;
 
+    /**
+     * 站点经纬度及名称
+     */
     private static double[] latitude_array = {30.763698, 30.751588, 30.738796, 30.72749};
     private static double[] longitude_array = {103.978044, 103.98289, 103.98589, 104.00276};
     private static String[] station_name = {"犀浦站", "天河路", "百草路", "金周路"};
     private static String[] station_num = {"cd0101", "cd0102", "cd0103", "cd0104"};
+
     private Marker marker[];
 
+    /**
+     * 弹窗显示
+     */
     private View view_pop;
     private PopupWindow infoPopupWindow;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -91,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
         checkGPS = new Utils(getBaseContext());
         locationClient = new LocationClient(getBaseContext());
 
+        /**
+         * 检查GPS是否开启
+         */
         if (!checkGPS.isOpen(getBaseContext())) {
             new AlertDialog.Builder(this)
                     .setTitle("请开启GPS")
@@ -119,7 +129,9 @@ public class MainActivity extends AppCompatActivity {
         locationClient.registerLocationListener(myListener);
         locationClient.start();
 
-        //获取我的位置
+        /**
+         * 获取我的位置
+         */
         btn_loc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +144,9 @@ public class MainActivity extends AppCompatActivity {
 
         tv_biaoji = (TextView) view_biaoji.findViewById(R.id.tv_biaoji);
 
+        /**
+         * 地铁站标记
+         */
         marker = new Marker[4];
         for (int i = 0; i < 4; i++) {
             tv_biaoji.setText(station_name[i]);
@@ -148,6 +163,9 @@ public class MainActivity extends AppCompatActivity {
         windowWidth = dm.widthPixels;
         windowHeight = dm.heightPixels;
 
+        /**
+         * 地铁站标记点击事件
+         */
         baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker m) {
@@ -175,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
                         headColor = getResources().getColor(R.color.tailColor);
                         tailColor = getResources().getColor(R.color.headColor);
 
+                        /**
+                         * 填充初始弹窗界面
+                         */
                         popAdapter = new PopAdapter(getBaseContext(), adapterData, headColor, tailColor, colors);
 
                         list.setAdapter(popAdapter);
@@ -186,6 +207,9 @@ public class MainActivity extends AppCompatActivity {
                         swipeRefreshLayout.setProgressBackgroundColorSchemeColor(Color.LTGRAY);
                         swipeRefreshLayout.setColorSchemeColors(Color.DKGRAY, Color.WHITE);
 
+                        /**
+                         * 使用SwipeRefreshLayout进行数据刷新
+                         */
                         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
@@ -215,12 +239,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 通过Handler获取服务器数据
+     */
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             Bundle bun = msg.getData();
             final String str = bun.getString("station_num");
 
+            /**
+             * 使用OkHttp进行json数据获取
+             */
             RequestParams params = new RequestParams();
             params.put("auth_key", str);
             AsyncHttpClient client = new AsyncHttpClient();
@@ -232,6 +262,8 @@ public class MainActivity extends AppCompatActivity {
                             HashMap<String, String> map = new HashMap<>();
 
                             try {
+                                map.clear();
+
                                 JSONTokener jsonParse = new JSONTokener(getFormServer);
                                 JSONObject jsonArray = (JSONObject) jsonParse.nextValue();
                                 map.put("data1", jsonArray.getString("data1"));
@@ -258,17 +290,18 @@ public class MainActivity extends AppCompatActivity {
                                         if (map.get(("data" + String.valueOf(i + 1))).equals("null")) {
                                             colors.add(i, 0);
                                         } else {
+                                            /**
+                                             * 通过对车厢不同颜色的填充来表示车厢的不同拥挤程度
+                                             */
                                             int dataTemp = Integer.valueOf(map.get("data" + String.valueOf(i + 1)));
-                                            if (dataTemp <= 40)
+                                            if (dataTemp < 55)
                                                 colors.add(i, getResources().getColor(R.color.green_very_empty));
-                                            else if (dataTemp <= 80)
-                                                colors.add(i, getResources().getColor(R.color.blue_empty));
-                                            else if (dataTemp <= 120)
+                                            else if (dataTemp < 110)
                                                 colors.add(i, getResources().getColor(R.color.yellow_crowded));
-                                            else if (dataTemp <= 160)
-                                                colors.add(i, getResources().getColor(R.color.orange_more_crowded));
-                                            else
+                                            else if (dataTemp < 165)
                                                 colors.add(i, getResources().getColor(R.color.red_very_crowded));
+                                            else
+                                                colors.add(i, getResources().getColor(R.color.purple_more_crowded));
                                         }
                                     }
                                     popAdapter.notifyDataSetChanged();
@@ -291,7 +324,9 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    // 返回到我的位置
+    /**
+     * 获取我的位置
+     */
     private void getMyLocation() {
         LatLng latLng = new LatLng(mLatitude, mLongitude);
         MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(latLng);

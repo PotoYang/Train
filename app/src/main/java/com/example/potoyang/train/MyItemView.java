@@ -15,6 +15,9 @@ import java.util.List;
 
 /**
  * Created by 71579 on 2017/3/29.
+ *
+ * 自定义弹窗中Item的效果
+ * 通过车厢不同颜色来表示不同的拥挤度
  */
 
 public class MyItemView extends View {
@@ -122,6 +125,12 @@ public class MyItemView extends View {
         }
     }
 
+    /**
+     * 绘制换向按钮，未完成
+     *
+     * @param canvas
+     * @param text
+     */
     private void drawText(Canvas canvas, String text) {
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
